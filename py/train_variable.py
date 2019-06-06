@@ -122,11 +122,11 @@ def main():
     with open(args.bin_list) as f:
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
 
-    try:
+    if os.path.isfile(results_file):
         with open(results_path, 'rb') as results_file:
             print('reading results file from {}'.format(results_path))
             results = random.shuffle(pickle.load(results_file))
-    except:
+    else:
         print('generating results file')
         with multiprocessing.Pool(args.workers) as pool:
             arguments = []
