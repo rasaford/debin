@@ -1,7 +1,7 @@
 #!/bin/bash
 
 workers=20
-base_dir="dataset/elf/64/training"
+base_dir="../dataset/elf/64/training"
 bin_list="$base_dir/bin_list.txt"
 bin_dir="$base_dir/stripped/"
 debug_dir="$base_dir/debug/"

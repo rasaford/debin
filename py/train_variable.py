@@ -112,13 +112,14 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     print('fitting ExtraTreesClassifier')
     model = model.fit(X, Y)
     with open(model_path, 'wb') as model_file:
-        print('writing model: ' + model_path
+        print('writing model: ' + model_path)
         pickle.dump(model, model_file)
 
 
 def main():
     args = get_args()
-
+    results_path = os.path.join(args.out_model, 'results')
+    
     with open(args.bin_list) as f:
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
     
@@ -127,7 +128,8 @@ def main():
         for b in bins:
             arguments.append((b, args.bin_dir, args.debug_dir, args.bap_dir))
         results = pool.starmap(generate_feature, arguments)
-	
+
+    pickle.dump(results, results_path)
     random.shuffle(results)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []
