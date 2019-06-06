@@ -59,12 +59,15 @@ def generate_feature(b, bin_dir, debug_dir, bap_dir):
             config.BAP_FILE_PATH = os.path.join(bap_dir, b)
         with open(config.BINARY_PATH, 'rb') as elffile, open(config.DEBUG_INFO_PATH, 'rb') as debug_elffile:
             b = Binary(config, elffile, debug_elffile)
-            return b.get_features()
-    except:
+            f = b.get_features()
+            return f
+    except Exception as e:
+        print('Exception: ' + str(e))
         return [], [], [], []
 
 
 def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_dir):
+    print('starting training')
     X, Y = [], []
     i_p, i_n = 0, 0
 
@@ -91,6 +94,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     dict_vec = DictVectorizer(sparse=True)
     dict_vec = dict_vec.fit(X)
     with open(dict_path, 'wb') as dict_file:
+        print('writing dict_file: ' + dict_path)
         pickle.dump(dict_vec, dict_file)
 
     X_dict = X
@@ -98,14 +102,17 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
     support = SelectKBest(chi2, k=num_f).fit(X, Y)
     with open(support_path, 'wb') as support_file:
+        print('writing support_path: ', support_file)
         pickle.dump(support, support_file)
 
     dict_vec.restrict(support.get_support())
     X = dict_vec.transform(X_dict)
 
     model = ExtraTreesClassifier(n_estimators=n_estimators, n_jobs=n_jobs)
+    print('fitting ExtraTreesClassifier')
     model = model.fit(X, Y)
     with open(model_path, 'wb') as model_file:
+        print('writing model: ' + model_path
         pickle.dump(model, model_file)
 
 
@@ -120,7 +127,7 @@ def main():
         for b in bins:
             arguments.append((b, args.bin_dir, args.debug_dir, args.bap_dir))
         results = pool.starmap(generate_feature, arguments)
-
+	
     random.shuffle(results)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []

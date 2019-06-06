@@ -203,7 +203,6 @@ class Binary:
         reg_y = []
         off_x = []
         off_y = []
-
         for node in self.nodes.nodes.values():
             if isinstance(node, Reg) and node.function.init_run:
                 reg_x.append(list(node.features))
@@ -217,7 +216,6 @@ class Binary:
                     off_y.append(1)
                 else:
                     off_y.append(0)
-
         return reg_x, reg_y, off_x, off_y
 
     def get_debug_abbrev(self):
