@@ -124,8 +124,10 @@ def main():
 
     try:
         with open(results_path, 'rb') as results_file:
+            print('reading results file from {}'.format(results_path))
             results = random.shuffle(pickle.load(results_file))
     except:
+        print('generating results file')
         with multiprocessing.Pool(args.workers) as pool:
             arguments = []
             for b in bins:
@@ -133,6 +135,7 @@ def main():
                     (b, args.bin_dir, args.debug_dir, args.bap_dir))
             results = pool.starmap(generate_feature, arguments)
 
+        print('writing results file to {}'.format(results_path))
         pickle.dump(results, results_path)
         random.shuffle(results)
 
