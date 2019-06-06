@@ -135,8 +135,9 @@ def main():
                     (b, args.bin_dir, args.debug_dir, args.bap_dir))
             results = pool.starmap(generate_feature, arguments)
 
-        print('writing results file to {}'.format(results_path))
-        pickle.dump(results, results_path)
+        with open(results_path, 'wb') as results_file:
+            print('writing results file to {}'.format(results_path))
+            pickle.dump(results, results_file)
         random.shuffle(results)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []
