@@ -122,23 +122,23 @@ def main():
     with open(args.bin_list) as f:
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
 
-    if os.path.isfile(results_file):
-        with open(results_path, 'rb') as results_file:
-            print('reading results file from {}'.format(results_path))
-            results = random.shuffle(pickle.load(results_file))
-    else:
-        print('generating results file')
-        with multiprocessing.Pool(args.workers) as pool:
-            arguments = []
-            for b in bins:
-                arguments.append(
-                    (b, args.bin_dir, args.debug_dir, args.bap_dir))
-            results = pool.starmap(generate_feature, arguments)
+    # if os.path.isfile(results_file):
+    #     with open(results_path, 'rb') as results_file:
+    #         print('reading results file from {}'.format(results_path))
+    #         results = random.shuffle(pickle.load(results_file))
+    # else:
+    print('generating results file')
+    with multiprocessing.Pool(args.workers) as pool:
+        arguments = []
+        for b in bins:
+            arguments.append(
+                (b, args.bin_dir, args.debug_dir, args.bap_dir))
+        results = pool.starmap(generate_feature, arguments)
 
-        with open(results_path, 'wb') as results_file:
-            print('writing results file to {}'.format(results_path))
-            pickle.dump(results, results_file)
-        random.shuffle(results)
+        # with open(results_path, 'wb') as results_file:
+        #     print('writing results file to {}'.format(results_path))
+        #     pickle.dump(results, results_file)
+    random.shuffle(results)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []
 
