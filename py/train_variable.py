@@ -14,10 +14,10 @@ from binary import Binary
 
 
 def get_args():
-    parser = argparse.ArgumentParser('Debin to hack binaries. ' \
-        'This script executes the training of variable classification models. ' \
-        'Make sure you have enough disk space.')
-    
+    parser = argparse.ArgumentParser('Debin to hack binaries. '
+                                     'This script executes the training of variable classification models. '
+                                     'Make sure you have enough disk space.')
+
     parser.add_argument('--bin_list', dest='bin_list', type=str, required=True,
                         help='list of binaries to train.')
     parser.add_argument('--bin_dir', dest='bin_dir', type=str, required=True,
@@ -44,7 +44,7 @@ def get_args():
                         help='dimension of features for the model for stack offsets.')
     parser.add_argument('--n_estimators', dest='n_estimators', type=int, default=25,
                         help='number of trees in the models.')
-    
+
     args = parser.parse_args()
     return args
 
@@ -84,7 +84,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
                 Y.append(y)
         else:
             break
-    
+
     X, Y = shuffle(X, Y)
 
     dict_path = os.path.join(output_dir, '{}.dict'.format(name))
@@ -119,18 +119,22 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 def main():
     args = get_args()
     results_path = os.path.join(args.out_model, 'results')
-    
     with open(args.bin_list) as f:
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
-    
-    with multiprocessing.Pool(args.workers) as pool:
-        arguments = []
-        for b in bins:
-            arguments.append((b, args.bin_dir, args.debug_dir, args.bap_dir))
-        results = pool.starmap(generate_feature, arguments)
 
-    pickle.dump(results, results_path)
-    random.shuffle(results)
+    try:
+        with open(results_path, 'rb') as results_file:
+            results = random.shuffle(pickle.load(results_file))
+    except:
+        with multiprocessing.Pool(args.workers) as pool:
+            arguments = []
+            for b in bins:
+                arguments.append(
+                    (b, args.bin_dir, args.debug_dir, args.bap_dir))
+            results = pool.starmap(generate_feature, arguments)
+
+        pickle.dump(results, results_path)
+        random.shuffle(results)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []
 
@@ -139,12 +143,14 @@ def main():
         reg_y += res[1]
         off_x += res[2]
         off_y += res[3]
-    
+
     if not os.path.exists(args.out_model):
         os.makedirs(args.out_model)
-    
-    train(reg_x, reg_y, args.reg_num_p, args.reg_num_n, args.reg_num_f, args.n_estimators, args.workers, 'reg', args.out_model)
-    train(off_x, off_y, args.off_num_p, args.off_num_n, args.off_num_f, args.n_estimators, args.workers, 'off', args.out_model)
+
+    train(reg_x, reg_y, args.reg_num_p, args.reg_num_n, args.reg_num_f,
+          args.n_estimators, args.workers, 'reg', args.out_model)
+    train(off_x, off_y, args.off_num_p, args.off_num_n, args.off_num_f,
+          args.n_estimators, args.workers, 'off', args.out_model)
 
 
 if __name__ == '__main__':
