@@ -1,13 +1,16 @@
 import os
 import pickle
+import gzip
 import random
 import argparse
 import multiprocessing
+import math
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.utils import shuffle
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.feature_selection import SelectKBest, chi2
+
 
 from common.config import Config
 from binary import Binary
@@ -93,7 +96,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
     dict_vec = DictVectorizer(sparse=True)
     dict_vec = dict_vec.fit(X)
-    with open(dict_path, 'wb') as dict_file:
+    with gzip.open(dict_path, 'wb') as dict_file:
         print('writing dict_file: ' + dict_path)
         pickle.dump(dict_vec, dict_file)
 
@@ -101,7 +104,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     X = dict_vec.transform(X)
 
     support = SelectKBest(chi2, k=num_f).fit(X, Y)
-    with open(support_path, 'wb') as support_file:
+    with gzip.open(support_path, 'wb') as support_file:
         print('writing support_path: ', support_file)
         pickle.dump(support, support_file)
 
@@ -111,16 +114,25 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     model = ExtraTreesClassifier(n_estimators=n_estimators, n_jobs=n_jobs)
     print('fitting ExtraTreesClassifier')
     model = model.fit(X, Y)
-    with open(model_path, 'wb') as model_file:
+    with gzip.open(model_path, 'wb') as model_file:
         print('writing model: ' + model_path)
         pickle.dump(model, model_file)
 
 
+def split_list(l, size):
+    res = []
+    while len(l) > size:
+        res.append(l[:size])
+        l = l[size:]
+    res.append(l)
+    return res
+
+
 def main():
     args = get_args()
-    results_path = os.path.join(args.out_model, 'results')
     with open(args.bin_list) as f:
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
+    bins.sort()
 
     # if os.path.isfile(results_file):
     #     with open(results_path, 'rb') as results_file:
@@ -128,17 +140,18 @@ def main():
     #         results = random.shuffle(pickle.load(results_file))
     # else:
     print('generating results file')
-    with multiprocessing.Pool(args.workers) as pool:
-        arguments = []
-        for b in bins:
-            arguments.append(
-                (b, args.bin_dir, args.debug_dir, args.bap_dir))
-        results = pool.starmap(generate_feature, arguments)
+    for i, block in enumerate(split_list(bins, 100)):
+        with multiprocessing.Pool(args.workers) as pool:
+            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
+                         for b in block]
+            results = pool.starmap(generate_feature, arguments)
 
-        # with open(results_path, 'wb') as results_file:
-        #     print('writing results file to {}'.format(results_path))
-        #     pickle.dump(results, results_file)
-    random.shuffle(results)
+        results_path = os.path.join(
+            args.out_model, 'block_{}.results'.format(i))
+        with gzip.open(results_path, 'wb') as results_file:
+            print('writing block {} of {} to {}'.format(
+                i, math.ceil(len(bins) / 100), results_path))
+            pickle.dump(results, results_file)
 
     reg_x, reg_y, off_x, off_y = [], [], [], []
 
