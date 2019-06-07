@@ -5,6 +5,7 @@ import random
 import argparse
 import multiprocessing
 import math
+import glob
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.utils import shuffle
@@ -119,13 +120,40 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
         pickle.dump(model, model_file)
 
 
-def split_list(l, size):
+def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
+    def block_path(i): return os.path.join(out_model, 'block_{}.results', i)
+
+    def split_list(l, size):
+        res = []
+        while len(l) > size:
+            res.append(l[:size])
+            l = l[size:]
+        res.append(l)
+        return res
+
+    BLOCK_SIZE = 5
+
+    print('analysing binaries')
+    if not os.path.isfile(block_path(0)):
+        for i, block in enumerate(split_list(binaries, BLOCK_SIZE)):
+            with multiprocessing.Pool(workers) as pool:
+                arguments = [(b, bin_dir, debug_dir, bap_dir)
+                             for b in block]
+                block = pool.starmap(generate_feature, arguments)
+
+            block_p = block_path(i)
+            with gzip.open(block_p, 'wb') as block_f:
+                print('writing block {} of {} to {}'.format(
+                    i, math.ceil(len(binaries) / BLOCK_SIZE), block_p))
+                pickle.dump(block, block_f)
+
+    paths = glob.glob(block_path('*'))
     res = []
-    while len(l) > size:
-        res.append(l[:size])
-        l = l[size:]
-    res.append(l)
-    return res
+    for p in paths:
+        print('reading block file {}'.format(p))
+        with gzip.open(p, 'rb') as f:
+            res = res + pickle.load(f)
+    return random.shuffle(res)
 
 
 def main():
@@ -134,35 +162,17 @@ def main():
         bins = list(map(lambda l: l.strip('\r\n'), f.readlines()))
     bins.sort()
 
-    # if os.path.isfile(results_file):
-    #     with open(results_path, 'rb') as results_file:
-    #         print('reading results file from {}'.format(results_path))
-    #         results = random.shuffle(pickle.load(results_file))
-    # else:
-    print('generating results file')
-    for i, block in enumerate(split_list(bins, 100)):
-        with multiprocessing.Pool(args.workers) as pool:
-            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
-                         for b in block]
-            results = pool.starmap(generate_feature, arguments)
-
-        results_path = os.path.join(
-            args.out_model, 'block_{}.results'.format(i))
-        with gzip.open(results_path, 'wb') as results_file:
-            print('writing block {} of {} to {}'.format(
-                i, math.ceil(len(bins) / 100), results_path))
-            pickle.dump(results, results_file)
-
-    reg_x, reg_y, off_x, off_y = [], [], [], []
-
-    for res in results:
-        reg_x += res[0]
-        reg_y += res[1]
-        off_x += res[2]
-        off_y += res[3]
-
     if not os.path.exists(args.out_model):
         os.makedirs(args.out_model)
+
+    results = analyse_binaries(
+        bins, args.bin_dir, args.debug_dir, args.bap_dir, args.out_model, args.workers)
+    reg_x, reg_y, off_x, off_y = zip(*results)
+    # for res in results:
+    #     reg_x.append(res[0])
+    #     reg_y.append(res[1])
+    #     off_x.append(res[2])
+    #     off_y.append(res[3])
 
     train(reg_x, reg_y, args.reg_num_p, args.reg_num_n, args.reg_num_f,
           args.n_estimators, args.workers, 'reg', args.out_model)
