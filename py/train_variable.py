@@ -107,7 +107,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
     support = SelectKBest(chi2, k=num_f).fit(X, Y)
     with gzip.open(support_path, 'wb') as support_file:
-        print('writing support_path: ', support_file)
+        print('writing support_path: ', support_path)
         pickle.dump(support, support_file)
 
     dict_vec.restrict(support.get_support())
@@ -132,7 +132,7 @@ def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
         res.append(l)
         return res
 
-    BLOCK_SIZE = 5
+    BLOCK_SIZE = 4*workers
 
     print('analysing binaries')
     if not os.path.isfile(block_path(0)):
