@@ -75,7 +75,8 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     X, Y = [], []
     i_p, i_n = 0, 0
     # print([(x[:4], y) for x,y in zip(X_raw, Y_raw)])
-    print('positive samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 1])) + ' negative samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 0])))
+    print('positive samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 1])) +
+          ' negative samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 0])))
 
     for x, y in zip(X_raw, Y_raw):
         if i_p < num_p or i_n < num_n:
@@ -90,7 +91,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
                 Y.append(y)
         else:
             break
-    
+
     X, Y = shuffle(X, Y)
 
     dict_path = os.path.join(output_dir, '{}.dict'.format(name))
@@ -122,7 +123,8 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
-    def block_path(i): return os.path.join(out_model, 'block_{}.results'.format(i))
+    def block_path(i): return os.path.join(
+        out_model, 'block_{}.results'.format(i))
 
     def split_list(l, size):
         res = []
@@ -132,7 +134,7 @@ def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
         res.append(l)
         return res
 
-    BLOCK_SIZE = 4*workers
+    BLOCK_SIZE = 2*workers
 
     print('analysing binaries')
     if not os.path.isfile(block_path(0)):
@@ -140,12 +142,13 @@ def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
             with multiprocessing.Pool(workers) as pool:
                 arguments = [(b, bin_dir, debug_dir, bap_dir)
                              for b in block]
-                block = [b for b in pool.starmap(generate_feature, arguments) if b]
+                block = [b for b in pool.starmap(
+                    generate_feature, arguments) if b]
 
             block_p = block_path(i)
             with gzip.open(block_p, 'wb') as block_f:
                 print('writing block {} of {} to {}'.format(
-                    i + 1 , math.ceil(len(binaries) / BLOCK_SIZE), block_p))
+                    i + 1, math.ceil(len(binaries) / BLOCK_SIZE), block_p))
                 pickle.dump(block, block_f)
 
     paths = glob.glob(block_path('*'))
