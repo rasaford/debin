@@ -1,12 +1,12 @@
 #!/bin/bash
 
 workers=20
-base_dir="../dataset/elf/x64_small/training"
+base_dir="examples"
 bin_list="$base_dir/bin_list.txt"
 bin_dir="$base_dir/stripped/"
 debug_dir="$base_dir/debug/"
-out_model_var="/dev/shm/models/variable/x64/"
-out_model_crf="/dev/shm/models/crf/x64/model"
+out_model_var="new_models/variable/x64/"
+out_model_crf="new_models/crf/x64/model"
 n2p_train="Nice2Predict/bazel-bin/n2p/training/train_json"
 log_dir="new_models/crf"
 

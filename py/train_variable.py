@@ -67,13 +67,15 @@ def generate_feature(b, bin_dir, debug_dir, bap_dir):
             return f
     except Exception as e:
         print('Exception: ' + str(e))
-        return [], [], [], []
+        return None
 
 
 def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_dir):
     print('starting training')
     X, Y = [], []
     i_p, i_n = 0, 0
+    # print([(x[:4], y) for x,y in zip(X_raw, Y_raw)])
+    print('positive samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 1])) + ' negative samples: ' + str(len([y for _, y in zip(X_raw, Y_raw) if y == 0])))
 
     for x, y in zip(X_raw, Y_raw):
         if i_p < num_p or i_n < num_n:
@@ -88,13 +90,12 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
                 Y.append(y)
         else:
             break
-
+    
     X, Y = shuffle(X, Y)
 
     dict_path = os.path.join(output_dir, '{}.dict'.format(name))
     support_path = os.path.join(output_dir, '{}.support'.format(name))
     model_path = os.path.join(output_dir, '{}.model'.format(name))
-
     dict_vec = DictVectorizer(sparse=True)
     dict_vec = dict_vec.fit(X)
     with gzip.open(dict_path, 'wb') as dict_file:
@@ -121,7 +122,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
-    def block_path(i): return os.path.join(out_model, 'block_{}.results', i)
+    def block_path(i): return os.path.join(out_model, 'block_{}.results'.format(i))
 
     def split_list(l, size):
         res = []
@@ -139,21 +140,22 @@ def analyse_binaries(binaries, bin_dir, debug_dir, bap_dir, out_model, workers):
             with multiprocessing.Pool(workers) as pool:
                 arguments = [(b, bin_dir, debug_dir, bap_dir)
                              for b in block]
-                block = pool.starmap(generate_feature, arguments)
+                block = [b for b in pool.starmap(generate_feature, arguments) if b]
 
             block_p = block_path(i)
             with gzip.open(block_p, 'wb') as block_f:
                 print('writing block {} of {} to {}'.format(
-                    i, math.ceil(len(binaries) / BLOCK_SIZE), block_p))
+                    i + 1 , math.ceil(len(binaries) / BLOCK_SIZE), block_p))
                 pickle.dump(block, block_f)
 
     paths = glob.glob(block_path('*'))
     res = []
-    for p in paths:
+    for p in reversed(paths):
         print('reading block file {}'.format(p))
         with gzip.open(p, 'rb') as f:
-            res = res + pickle.load(f)
-    return random.shuffle(res)
+            res += pickle.load(f)
+    random.shuffle(res)
+    return res
 
 
 def main():
@@ -167,12 +169,9 @@ def main():
 
     results = analyse_binaries(
         bins, args.bin_dir, args.debug_dir, args.bap_dir, args.out_model, args.workers)
+
     reg_x, reg_y, off_x, off_y = zip(*results)
-    # for res in results:
-    #     reg_x.append(res[0])
-    #     reg_y.append(res[1])
-    #     off_x.append(res[2])
-    #     off_y.append(res[3])
+    reg_x, reg_y, off_x, off_y = reg_x[0], reg_y[0], off_x[0], off_y[0]
 
     train(reg_x, reg_y, args.reg_num_p, args.reg_num_n, args.reg_num_f,
           args.n_estimators, args.workers, 'reg', args.out_model)
