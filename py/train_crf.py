@@ -39,7 +39,7 @@ def main():
 
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir)
-
+    print('creating dependency graph')
     if args.bap_dir == '':
         cmd = 'cat {} | xargs -I % -P{} python3 {} --binary {} --debug_info {} --graph {}'.format(
             args.bin_list,
@@ -68,6 +68,7 @@ def main():
     )
     subprocess.call(cmd, shell=True)
 
+    print('starting n2p train')
     cmd = '{} --input {} --log_dir {} --valid_labels {} --out_model {} --num_threads {} --training_method pl --max_labels_z {}'.format(
         args.n2p_train,
         os.path.join(args.log_dir, 'feature.json'),
