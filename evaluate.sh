@@ -18,8 +18,8 @@ echo "Starting n2p server" &&
         --model $out_model_crf \
         --valid_labels $valid_labels \
         -logtostderr &
-cd ..
-
+cd ~/debin
+sleep 5
 echo "Predicting debug info for example binary lcrack" &&
     python3 py/predict.py \
         --binary "examples/stripped/lcrack" \
@@ -28,7 +28,7 @@ echo "Predicting debug info for example binary lcrack" &&
         -two_pass \
         --fp_model $out_model_var \
         --n2p_url "http://localhost:8604" &&
-    readelf -S lcrack.output
+    diff <(readelf -S lcrack.output) <(readelf -S examples/stripped/lcrack)
 
 # echo "Starting evaluation for test dataset" &&
 #     python3 py/evaluate.py \
