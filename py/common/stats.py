@@ -96,7 +96,7 @@ class Stats:
                 w.write('\t{} : {} -> {}\n'.format(e[1], e[0][0], e[0][1]))
 
     def dump(self):
-        with open(self.binary.config.STAT_PATH, 'w') as w:
+        with open(self.binary.config.STAT_PATH, 'w', encoding='utf-8') as w:
             stats = {}
             stats['path'] = self.binary.config.BINARY_PATH
 
@@ -142,7 +142,7 @@ class Stats:
             stats['f1_ttype_2p'] = f1_ttype_2p
 
 
-            stats['time'] = str(TIMER)
+            stats['time'] = TIMER
 
 
             stats['total'] = self.total
@@ -223,4 +223,4 @@ class Stats:
             stats['directoffset_ttype_inf'] = DirectOffset.ttype_inf
             stats['directoffset_ttype_correct'] = DirectOffset.ttype_correct
 
-            json.dump(stats, w)
+            json.dump(stats, w, ensure_ascii=False, indent=4, sort_keys=True)
