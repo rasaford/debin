@@ -30,6 +30,12 @@ echo "Predicting debug info for example binary lcrack" &&
         --n2p_url "http://localhost:8604" &&
     diff <(readelf -S lcrack.output) <(readelf -S examples/stripped/lcrack)
 
-# echo "Starting evaluation for test dataset" &&
-#     python3 py/evaluate.py \
-#         --binary 
+echo "Starting evaluation for test dataset" &&
+    python3 py/evaluate.py \
+        --binary "examples/stripped/lcrack" \
+        --debug_info "examples/debug/lcrack" \
+        -two_pass \
+        --fp_model $out_model_var \
+        --n2p_url "http://localhost:8604" \
+        --stat "./stat.txt"
+cat stat.txt
