@@ -16,7 +16,7 @@ echo "Starting n2p server" &&
     ./bazel-bin/n2p/json_server/json_server \
         --port 8604 \
         --model $out_model_crf \
-        --valid_labels $c_valid_labels \
+        --valid_labels $valid_labels \
         -logtostderr &
 cd ..
 
