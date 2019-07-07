@@ -3,6 +3,7 @@ import pickle
 import random
 import argparse
 import multiprocessing
+import gzip
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.utils import shuffle
@@ -60,7 +61,8 @@ def generate_feature(b, bin_dir, debug_dir, bap_dir):
         with open(config.BINARY_PATH, 'rb') as elffile, open(config.DEBUG_INFO_PATH, 'rb') as debug_elffile:
             b = Binary(config, elffile, debug_elffile)
             return b.get_features()
-    except:
+    except Exception as e:
+        print('Exception in binary anaylsis: ' + str(e))
         return [], [], [], []
 
 

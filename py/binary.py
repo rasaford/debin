@@ -86,7 +86,10 @@ class Binary:
                     bap_result = subprocess.getoutput('bap {} --pass=loc --symbolizer=objdump'.format(self.path))
             else:
                 bap_result = subprocess.getoutput('bap {} --pass=loc --symbolizer=objdump --byteweight-sigs={}'.format(self.path, self.config.BYTEWEIGHT_SIGS_PATH))
-            bap_json = json.loads(bap_result)
+            try:
+                bap_json = json.loads(bap_result)
+            except Exception as e:
+                print(bap_result)
         else:
             bap_json = json.load(open(self.config.BAP_FILE_PATH))
 

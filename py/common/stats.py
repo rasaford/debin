@@ -142,7 +142,7 @@ class Stats:
             stats['f1_ttype_2p'] = f1_ttype_2p
 
 
-            stats['time'] = TIMER
+            stats['time'] = str(TIMER)
 
 
             stats['total'] = self.total

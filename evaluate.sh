@@ -38,5 +38,5 @@ echo "Starting evaluation for test dataset" &&
         -two_pass \
         --fp_model $out_model_var \
         --n2p_url "http://localhost:8604" \
-        --stat "./stat.txt"
-cat stat.txt
+        --stat "./stat.json"
+cat stat.json
