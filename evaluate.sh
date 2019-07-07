@@ -21,7 +21,7 @@ echo "Starting n2p server" &&
 cd ..
 
 echo "Predicting debug info for example binary lcrack" &&
-    python3 py/binary.py \
+    python3 py/predict.py \
         --binary "examples/stripped/lcrack" \
         --output "./lcrack.output" \
         --elf_modifier "cpp/modify_elf.so" \
