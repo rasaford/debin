@@ -28,6 +28,7 @@ echo "Predicting debug info for example binary lcrack" &&
         -two_pass \
         --fp_model $out_model_var \
         --n2p_url "http://localhost:8604" &&
+    echo "Diff predicted info in test binary" &&
     diff <(readelf -S lcrack.output) <(readelf -S examples/stripped/lcrack)
 
 echo "Starting evaluation for test dataset" &&
