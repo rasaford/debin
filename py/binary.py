@@ -89,7 +89,7 @@ class Binary:
             try:
                 bap_json = json.loads(bap_result)
             except Exception as e:
-                print(bap_result[:20])
+                print('error while parsing bap json: ' + bap_result[:20])
         else:
             bap_json = json.load(open(self.config.BAP_FILE_PATH))
 
