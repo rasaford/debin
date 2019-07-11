@@ -129,7 +129,7 @@ def block_process(bins, args):
     for path in os.listdir(args.out_model):
         if path.endswith('.block'):
             print('reading block {}'.format(path))
-            with open(path, 'rb') as f:
+            with open(os.path.join(args.out_model, path), 'rb') as f:
                 results = results + pickle.load(f)
     return results
 
