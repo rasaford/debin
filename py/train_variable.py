@@ -51,7 +51,7 @@ def get_args():
     return args
 
 
-def generate_feature(b, bin_dir, debug_dir, bap_dir, index):
+def generate_feature(b, bin_dir, debug_dir, bap_dir):
     try:
         config = Config()
         config.BINARY_NAME = b
@@ -61,10 +61,7 @@ def generate_feature(b, bin_dir, debug_dir, bap_dir, index):
             config.BAP_FILE_PATH = os.path.join(bap_dir, b)
         with open(config.BINARY_PATH, 'rb') as elffile, open(config.DEBUG_INFO_PATH, 'rb') as debug_elffile:
             b = Binary(config, elffile, debug_elffile)
-            f = b.get_features()
-            if index % 10 == 0:
-                print('generated features for binary {}'.format(index))
-            return f
+            return b.get_features()
     except Exception as e:
         print('Exception in binary anaylsis: ' + e)
         return [], [], [], []
