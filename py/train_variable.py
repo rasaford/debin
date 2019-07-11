@@ -122,14 +122,14 @@ def block_process(bins, args):
             arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir) for b in block]
             results = pool.starmap(generate_feature, arguments)
         print('writing block {} to {}'.format(i, block_path))
-        with open(block_path, 'w') as f:
+        with open(block_path, 'wb') as f:
             pickle.dump(results, f)
 
     results = []
     for path in os.listdir(args.out_model):
         if path.endswith('.block'):
             print('reading block {}'.format(path))
-            with open(path, 'r') as f:
+            with open(path, 'rb') as f:
                 results = results + pickle.load(f)
     return results
 
