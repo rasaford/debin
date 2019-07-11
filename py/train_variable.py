@@ -126,11 +126,13 @@ def block_process(bins, args):
             pickle.dump(results, f)
 
     results = []
-    for path in os.listdir(args.out_model):
-        if path.endswith('.block'):
-            print('reading block {}'.format(path))
-            with open(os.path.join(args.out_model, path), 'rb') as f:
+    for file in os.listdir(args.out_model):
+        if file.endswith('.block'):
+            p = os.path.join(args.out_model, file) 
+            print('reading block {}'.format(p))
+            with open(p, 'rb') as f:
                 results = results + pickle.load(f)
+    print('ran bap for {} binaries'.format(len(results)))
     return results
 
 def main():
