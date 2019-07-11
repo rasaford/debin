@@ -2,7 +2,7 @@
 
 workers=20
 dataset_dir="../dataset/elf/x64/training"
-out_model="/dev/shm/models"
+out_model="/mnt/cache/models"
 bin_list="$dataset_dir/bin_list.txt"
 bin_dir="$dataset_dir/stripped/"
 debug_dir="$dataset_dir/debug/"
@@ -11,7 +11,14 @@ out_model_crf="$out_model/crf/x64/model"
 log_dir="$out_model/log"
 n2p_train="~/debin/Nice2Predict/bazel-bin/n2p/training/train_json"
 
+if [ ! -d "/mnt/cache/bap" ]; then
+	mkdir /mnt/cache/bap
+	rm -rf ~/.cache/bap
+	ln -s /mnt/cache/bap ~/.cache/bap
+fi
+
 mkdir -p $out_model_var $out_model_crf $log_dir
+
 
 echo "STARTING VARIABLE TRAINING" &&
 python3 py/train_variable.py \

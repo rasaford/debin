@@ -4,6 +4,7 @@ import random
 import argparse
 import multiprocessing
 import gzip
+import traceback
 
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.utils import shuffle
@@ -50,7 +51,7 @@ def get_args():
     return args
 
 
-def generate_feature(b, bin_dir, debug_dir, bap_dir):
+def generate_feature(b, bin_dir, debug_dir, bap_dir, index):
     try:
         config = Config()
         config.BINARY_NAME = b
@@ -60,9 +61,12 @@ def generate_feature(b, bin_dir, debug_dir, bap_dir):
             config.BAP_FILE_PATH = os.path.join(bap_dir, b)
         with open(config.BINARY_PATH, 'rb') as elffile, open(config.DEBUG_INFO_PATH, 'rb') as debug_elffile:
             b = Binary(config, elffile, debug_elffile)
-            return b.get_features()
+            f = b.get_features()
+            if index % 10 == 0:
+                print('generated features for binary {}'.format(index))
+            return f
     except Exception as e:
-        print('Exception in binary anaylsis: ' + str(e))
+        print('Exception in binary anaylsis: ' + e)
         return [], [], [], []
 
 
@@ -119,8 +123,8 @@ def main():
     
     with multiprocessing.Pool(args.workers) as pool:
         arguments = []
-        for b in bins:
-            arguments.append((b, args.bin_dir, args.debug_dir, args.bap_dir))
+        for i, b in enumerate(bins):
+            arguments.append((b, args.bin_dir, args.debug_dir, args.bap_dir, i))
         results = pool.starmap(generate_feature, arguments)
 
     random.shuffle(results)

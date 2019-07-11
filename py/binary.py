@@ -87,9 +87,12 @@ class Binary:
             else:
                 bap_result = subprocess.getoutput('bap {} --pass=loc --symbolizer=objdump --byteweight-sigs={}'.format(self.path, self.config.BYTEWEIGHT_SIGS_PATH))
             try:
-                bap_json = json.loads(bap_result)
+                # for some reason this is necessary when bap decides to log to stdout
+                res = ''.join([x for x in bap_result.split('\n') if x.startswith('{')])
+                bap_json = json.loads(res)
             except Exception as e:
-                print(bap_result[:20])
+                print('bap error on {}: {}'.format(self.path, bap_result[:500]))
+                raise e
         else:
             bap_json = json.load(open(self.config.BAP_FILE_PATH))
 
