@@ -35,6 +35,10 @@ def get_args():
 def main():
     args = get_args()
 
+    # only analyse the graph if it has not been done before
+    if os.path.isfile(args.graph):
+        return
+
     config = Config()
 
     config.MODE = config.TRAIN
