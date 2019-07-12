@@ -121,7 +121,7 @@ def block_process(bins, args):
     block_size = args.workers // 2
     blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
 
-    def block_path(i): os.path.join(args.out_model, '{}.block'.format(i))
+    def block_path(i): return os.path.join(args.out_model, '{}.block'.format(i))
 
     for i, block in enumerate(blocks):
         path = block_path(i)
