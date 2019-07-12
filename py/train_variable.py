@@ -92,6 +92,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     model_path = os.path.join(output_dir, '{}.model'.format(name))
 
     dict_vec = DictVectorizer(sparse=True)
+    print('fitting DictVectorizer')
     dict_vec = dict_vec.fit(X)
     with open(dict_path, 'wb') as dict_file:
         pickle.dump(dict_vec, dict_file)
@@ -99,6 +100,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     X_dict = X
     X = dict_vec.transform(X)
 
+    print('fitting SelectKBest')
     support = SelectKBest(chi2, k=num_f).fit(X, Y)
     with open(support_path, 'wb') as support_file:
         pickle.dump(support, support_file)
@@ -107,9 +109,12 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
     X = dict_vec.transform(X_dict)
 
     model = ExtraTreesClassifier(n_estimators=n_estimators, n_jobs=n_jobs)
+    print('fitting ExtraTreesClassifier')
+
     model = model.fit(X, Y)
     with open(model_path, 'wb') as model_file:
         pickle.dump(model, model_file)
+    print('done training {}'.format(name))
 
 
 def block_process(bins, args):
@@ -119,6 +124,7 @@ def block_process(bins, args):
     for i, block in enumerate(blocks):
         block_path = os.path.join(args.out_model, '{}.block'.format(i))
         if os.path.isfile(block_path):
+            print('skipping bap analysis for {}'.format(block_path))
             continue
 
         with multiprocessing.Pool(args.workers // 2) as pool:
