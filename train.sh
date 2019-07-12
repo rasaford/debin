@@ -2,12 +2,12 @@
 
 workers=20
 dataset_dir="../dataset/elf/x64/training"
-out_model="/mnt/cache/models"
+out_model="/mnt/cache/models/x64"
 bin_list="$dataset_dir/bin_list.txt"
 bin_dir="$dataset_dir/stripped/"
 debug_dir="$dataset_dir/debug/"
-out_model_var="$out_model/variable/x64/"
-out_model_crf="$out_model/crf/x64/model"
+out_model_var="$out_model/variable/"
+out_model_crf="$out_model/crf/model"
 log_dir="$out_model/log"
 n2p_train="~/debin/Nice2Predict/bazel-bin/n2p/training/train_json"
 
