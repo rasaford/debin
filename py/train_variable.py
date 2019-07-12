@@ -121,27 +121,28 @@ def block_process(bins, args):
     block_size = args.workers // 2
     blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
 
+    def block_path(i): os.path.join(args.out_model, '{}.block'.format(i))
+
     for i, block in enumerate(blocks):
-        block_path = os.path.join(args.out_model, '{}.block'.format(i))
-        if os.path.isfile(block_path):
-            print('skipping bap analysis for {}'.format(block_path))
+        path = block_path(i)
+        if os.path.isfile(path):
+            print('skipping bap analysis for {}'.format(path))
             continue
 
         with multiprocessing.Pool(args.workers // 2) as pool:
             arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
                          for b in block]
             results = pool.starmap(generate_feature, arguments)
-        print('writing block {} to {}'.format(i, block_path))
+        print('writing block {} to {}'.format(i, path))
         with gzip.open(block_path, 'wb') as f:
             pickle.dump(results, f)
 
     results = []
-    for file in os.listdir(args.out_model):
-        if file.endswith('.block'):
-            block_path = os.path.join(args.out_model, file)
-            print('reading block {}'.format(block_path))
-            with gzip.open(block_path, 'rb') as f:
-                results = results + pickle.load(f)
+    for i, _ in enumerate(blocks):
+        path = block_path(i)
+        print('reading block {}'.format(path))
+        with gzip.open(path, 'rb') as f:
+            results = results + pickle.load(f)
     print('ran bap for {} binaries'.format(len(results)))
     return results
 
