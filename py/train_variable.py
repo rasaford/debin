@@ -113,16 +113,16 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def block_process(bins, args):
-    block_size = 30
+    block_size = int(args.workers / 2)
     blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
 
     for i, block in enumerate(blocks):
         block_path = os.path.join(args.out_model, '{}.block'.format(i))
-        with multiprocessing.Pool(args.workers) as pool:
+        with multiprocessing.Pool(int(args.workers / 2)) as pool:
             arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir) for b in block]
             results = pool.starmap(generate_feature, arguments)
         print('writing block {} to {}'.format(i, block_path))
-        with open(block_path, 'wb') as f:
+        with gzip.open(block_path, 'wb') as f:
             pickle.dump(results, f)
 
     results = []
@@ -130,7 +130,7 @@ def block_process(bins, args):
         if file.endswith('.block'):
             p = os.path.join(args.out_model, file) 
             print('reading block {}'.format(p))
-            with open(p, 'rb') as f:
+            with gzip.open(p, 'rb') as f:
                 results = results + pickle.load(f)
     print('ran bap for {} binaries'.format(len(results)))
     return results
