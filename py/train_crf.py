@@ -43,7 +43,7 @@ def main():
     if args.bap_dir == '':
         cmd = 'cat {} | xargs -I % -P{} python3 {} --binary {} --debug_info {} --graph {}'.format(
             args.bin_list,
-            args.workers,
+            args.workers // 2,
             args.bin_to_graph,
             os.path.join(args.bin_dir, '%'),
             os.path.join(args.debug_dir, '%'),
@@ -52,7 +52,7 @@ def main():
     else:
         cmd = 'cat {} | xargs -I % -P{} python3 {} --binary {} --debug_info {} --bap {} --graph {}'.format(
             args.bin_list,
-            args.workers,
+            args.workers // 2,
             args.bin_to_graph,
             os.path.join(args.bin_dir, '%'),
             os.path.join(args.debug_dir, '%'),
