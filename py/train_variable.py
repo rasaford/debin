@@ -113,7 +113,7 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def block_process(bins, args):
-    block_size = 50
+    block_size = 30
     blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
 
     for i, block in enumerate(blocks):
