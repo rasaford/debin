@@ -118,8 +118,12 @@ def block_process(bins, args):
 
     for i, block in enumerate(blocks):
         block_path = os.path.join(args.out_model, '{}.block'.format(i))
+        if os.path.isfile(block_path):
+            continue
+
         with multiprocessing.Pool(args.workers) as pool:
-            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir) for b in block]
+            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
+                         for b in block]
             results = pool.starmap(generate_feature, arguments)
         print('writing block {} to {}'.format(i, block_path))
         with open(block_path, 'wb') as f:
@@ -128,12 +132,13 @@ def block_process(bins, args):
     results = []
     for file in os.listdir(args.out_model):
         if file.endswith('.block'):
-            p = os.path.join(args.out_model, file) 
+            p = os.path.join(args.out_model, file)
             print('reading block {}'.format(p))
             with open(p, 'rb') as f:
                 results = results + pickle.load(f)
     print('ran bap for {} binaries'.format(len(results)))
     return results
+
 
 def main():
     args = get_args()
