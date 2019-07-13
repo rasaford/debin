@@ -34,14 +34,14 @@ def get_args():
 def run_eval(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
     evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model)
     print('evaluated binary {}, loading results...'.format(binary))
-    with open(stat, 'rb') as f:
+    with open(stat) as f:
         data = json.load(f)
     return data
 
 
 def main():
     args = get_args()
-    with open(args.bin_list, 'rb') as f:
+    with open(args.bin_list) as f:
         binaries = list(map(lambda l: l.strip('\r\n'), f.readlines()))
 
     with multiprocessing.Pool(args.workers) as pool:

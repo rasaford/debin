@@ -39,3 +39,4 @@ echo "STARTING VARIABLE TRAINING" &&
 		--workers $workers \
 		--n2p_train $n2p_train \
 		--valid_labels c_valid_labels
+	tar -czf $out_model/models_$(date +%Y-%m-%d_%H-%M-%S).tar.gz $out_model_var/off* $out_model_var/reg* $out_model/crf
