@@ -125,9 +125,9 @@ def block_process(bins, args):
         path = bin_path(b)
         print(path)
         if not os.path.isfile(path):
-            res = list(generate_feature(b, bin_dir, debug_dir, bap_dir))
+            res = generate_feature(b, bin_dir, debug_dir, bap_dir)
             print('analysed binary {} writing to {}'.format(b, path))
-            with gzip.open(path, 'wb'):
+            with gzip.open(path, 'wb') as f:
                 pickle.dump(res, f)
 
     with multiprocessing.Pool(args.workers // 2) as pool:
@@ -140,7 +140,7 @@ def block_process(bins, args):
         path = bin_path(name)
         print('reading analysed binary {}'.format(path))
         with gzip.open(path, 'rb') as f:
-            results = results + pickle.load(f)
+            results.append(pickle.load(f))
     print('ran bap for {} binaries'.format(len(results)))
     return results
 
