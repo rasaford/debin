@@ -119,10 +119,11 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 def block_process(bins, args):
     def bin_path(name): return os.path.join(
-        args.out_model, '{}.block'.format(name))
+        args.out_model, '{}.part'.format(name))
 
     def analyse_binary(b, bin_dir, debug_dir, bap_dir):
         path = bin_path(b)
+        print(path)
         if not os.path.isfile(path):
             res = generate_feature(b, bin_dir, debug_dir, bap_dir)
             print('analysed binary {} writing to {}'.format(b, path))
@@ -130,13 +131,13 @@ def block_process(bins, args):
                 pickle.dump(res, f)
 
     with multiprocessing.Pool(args.workers // 2) as pool:
-        arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
-                     for b in bins]
+        arguments = [(name, args.bin_dir, args.debug_dir, args.bap_dir)
+                     for name in bins]
         pool.starmap(analyse_binary, arguments)
 
     results = []
-    for b in bins:
-        path = bin_path(b)
+    for name in bins:
+        path = bin_path(name)
         print('reading analysed binary {}'.format(path))
         with gzip.open(path, 'rb') as f:
             results.append(pickle.load(f))
