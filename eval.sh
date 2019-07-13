@@ -22,12 +22,13 @@ cd Nice2Predict
     --valid_labels ../c_valid_labels \
     -logtostderr &
 cd ..
-python3 py/evaluate_set.py \
-    --bin_list $bin_list \
-    --bin_dir $bin_dir \
-    --debug_dir $debug_dir
-    --bap $bap_cache
-    -two_pass \
-    --classifier $classifier \
-    --n2p_url $n2p_url \
-    --log_dir $log_dir
+sleep 5 &&
+    python3 py/evaluate_set.py \
+        --bin_list $bin_list \
+        --bin_dir $bin_dir \
+        --debug_dir $debug_dir \
+        --bap $bap_cache \
+        -two_pass \
+        --classifier $classifier \
+        --n2p_url $n2p_url \
+        --log_dir $log_dir
