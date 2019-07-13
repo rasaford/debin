@@ -19,7 +19,7 @@ def get_args():
                         help='Directory of binaries with debug symbols')
     parser.add_argument('--bap', dest='bap', type=str, default='',
                         help='path of cached BAP-IR file.')
-    parser.add_argument('-two_pass', default=False,
+    parser.add_argument('-two_pass', dest='two_pass', action='store_true', default=False,
                         help='whether to use two passes (variable classification and structured prediction). Setting it to false only will only invoke structured prediction.')
     parser.add_argument('--classifier', type=str, required=True,
                         help='Path of the models for the first pass (variable classification).')
