@@ -118,29 +118,31 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def block_process(bins, args):
-    def bin_path(name): return os.path.join(
-        args.out_model, '{}.part'.format(name))
+    block_size = args.workers // 2
+    blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
 
-    def analyse_binary(b, bin_dir, debug_dir, bap_dir):
-        path = bin_path(b)
-        print(path)
-        if not os.path.isfile(path):
-            res = list(generate_feature(b, bin_dir, debug_dir, bap_dir))
-            print('analysed binary {} writing to {}'.format(b, path))
-            with gzip.open(path, 'wb') as f:
-                pickle.dump(res, f)
+    def block_path(i): return os.path.join(args.out_model, '{}.block'.format(i))
 
-    with multiprocessing.Pool(args.workers // 2) as pool:
-        arguments = [(name, args.bin_dir, args.debug_dir, args.bap_dir)
-                     for name in bins]
-        pool.starmap(analyse_binary, arguments)
+    for i, block in enumerate(blocks):
+        path = block_path(i)
+        if os.path.isfile(path):
+            print('skipping bap analysis for {}'.format(path))
+            continue
+
+        with multiprocessing.Pool(args.workers // 2) as pool:
+            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
+                         for b in block]
+            results = pool.starmap(generate_feature, arguments)
+        print('writing block {} to {}'.format(i, path))
+        with gzip.open(path, 'wb') as f:
+            pickle.dump(results, f)
 
     results = []
-    for name in bins:
-        path = bin_path(name)
-        print('reading analysed binary {}'.format(path))
+    for i, _ in enumerate(blocks):
+        path = block_path(i)
+        print('reading block {}'.format(path))
         with gzip.open(path, 'rb') as f:
-            results.append(pickle.load(f))
+            results = results + pickle.load(f)
     print('ran bap for {} binaries'.format(len(results)))
     return results
 
