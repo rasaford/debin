@@ -9,9 +9,9 @@ from binary import Binary
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Debin to hack binaries. ' \
-        'This script turns a binary and its debug information into a conditional dependency graph with ground truth. ' \
-        'This is needed by Nice2Predict to train a CRF model.')
+    parser = argparse.ArgumentParser(description='Debin to hack binaries. '
+                                     'This script turns a binary and its debug information into a conditional dependency graph with ground truth. '
+                                     'This is needed by Nice2Predict to train a CRF model.')
 
     parser.add_argument('--binary', dest='binary', type=str, default='', required=True,
                         help='Path of the binary you want to analyze.')
@@ -34,27 +34,26 @@ def get_args():
     return args
 
 
-def main():
-    args = get_args()
-
+def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
     config = Config()
 
     config.MODE = config.TRAIN
 
-    config.BINARY_PATH = args.binary
-    config.BINARY_NAME = args.binary
-    config.BAP_FILE_PATH = args.bap
-    config.DEBUG_INFO_PATH = args.debug_info
+    config.BINARY_PATH = binary
+    config.BINARY_NAME = binary
+    config.BAP_FILE_PATH = bap
+    config.DEBUG_INFO_PATH = debug_info
 
-    config.N2P_SERVER_URL = args.n2p_url
-    config.STAT_PATH = args.stat
+    config.N2P_SERVER_URL = n2p_url
+    config.STAT_PATH = stat
 
-    config.TWO_PASS = args.two_pass
-    config.FP_MODEL_PATH = args.fp_model
+    config.TWO_PASS = two_pass
+    config.FP_MODEL_PATH = fp_model
     if config.TWO_PASS:
         reg_dict = open(os.path.join(config.FP_MODEL_PATH, 'reg.dict'), 'rb')
         reg_model = open(os.path.join(config.FP_MODEL_PATH, 'reg.model'), 'rb')
-        reg_support = open(os.path.join(config.FP_MODEL_PATH, 'reg.support'), 'rb')
+        reg_support = open(os.path.join(
+            config.FP_MODEL_PATH, 'reg.support'), 'rb')
         config.REG_DICT = pickle.load(reg_dict, encoding='latin1')
         config.REG_SUPPORT = pickle.load(reg_support, encoding='latin1')
         config.REG_DICT.restrict(config.REG_SUPPORT.get_support())
@@ -63,7 +62,8 @@ def main():
 
         off_dict = open(os.path.join(config.FP_MODEL_PATH, 'off.dict'), 'rb')
         off_model = open(os.path.join(config.FP_MODEL_PATH, 'off.model'), 'rb')
-        off_support = open(os.path.join(config.FP_MODEL_PATH, 'off.support'), 'rb')
+        off_support = open(os.path.join(
+            config.FP_MODEL_PATH, 'off.support'), 'rb')
         config.OFF_DICT = pickle.load(off_dict, encoding='latin1')
         config.OFF_SUPPORT = pickle.load(off_support, encoding='latin1')
         config.OFF_DICT.restrict(config.OFF_SUPPORT.get_support())
@@ -89,4 +89,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    args = get_args()
+    evaluate_binary(args.binary, args.bap, args.debug_info, args.n2p_url,
+                    args.stat, args.two_pass, args.fp_model)
