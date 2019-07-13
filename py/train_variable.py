@@ -134,7 +134,7 @@ def block_process(bins, args):
                          for b in block]
             results = pool.starmap(generate_feature, arguments)
         print('writing block {} to {}'.format(i, path))
-        with gzip.open(block_path, 'wb') as f:
+        with gzip.open(path, 'wb') as f:
             pickle.dump(results, f)
 
     results = []
