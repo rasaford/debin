@@ -32,7 +32,14 @@ def get_args():
 
 
 def run_eval(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
-    evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model)
+    try:
+        evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model)
+        if os.path.isfile(stat):
+            return None
+    except Exception as e:
+        print('error in binary {}, {}'.format(binary, e))
+        return None
+
     print('evaluated binary {}, loading results...'.format(binary))
     with open(stat) as f:
         data = json.load(f)
@@ -49,10 +56,10 @@ def main():
                       os.path.join(args.debug_dir, bin), args.n2p_url,
                       os.path.join(args.log_dir, bin + '.json'),
                       args.two_pass, args.classifier) for bin in binaries]
-        results = pool.starmap(run_eval, arguments)
+        results = [x for x in pool.starmap(run_eval, arguments) if x]
 
     results_path = os.path.join(args.log_dir, 'stats.json')
-    print('done evaluating binaries, wirting results to {}'.format(results_path))
+    print('done evaluating binaries, writing results to {}'.format(results_path))
     with open(results_path) as f:
         json.dump(results, f)
 
