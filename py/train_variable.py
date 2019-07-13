@@ -118,31 +118,28 @@ def train(X_raw, Y_raw, num_p, num_n, num_f, n_estimators, n_jobs, name, output_
 
 
 def block_process(bins, args):
-    block_size = args.workers // 2
-    blocks = [bins[i: i + block_size] for i in range(0, len(bins), block_size)]
+    def bin_path(name): return os.path.join(
+        args.out_model, '{}.block'.format(name))
 
-    def block_path(i): return os.path.join(args.out_model, '{}.block'.format(i))
+    def analyse_binary(b, bin_dir, debug_dir, bap_dir):
+        path = bin_path(b)
+        if not os.path.isfile(path):
+            res = generate_feature(b, bin_dir, debug_dir, bap_dir)
+            print('analysed binary {} writing to {}'.format(b, path))
+            with gzip.open(path, 'wb'):
+                pickle.dump(res, f)
 
-    for i, block in enumerate(blocks):
-        path = block_path(i)
-        if os.path.isfile(path):
-            print('skipping bap analysis for {}'.format(path))
-            continue
-
-        with multiprocessing.Pool(args.workers // 2) as pool:
-            arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
-                         for b in block]
-            results = pool.starmap(generate_feature, arguments)
-        print('writing block {} to {}'.format(i, path))
-        with gzip.open(path, 'wb') as f:
-            pickle.dump(results, f)
+    with multiprocessing.Pool(args.workers // 2) as pool:
+        arguments = [(b, args.bin_dir, args.debug_dir, args.bap_dir)
+                     for b in bins]
+        pool.starmap(analyse_binary, arguments)
 
     results = []
-    for i, _ in enumerate(blocks):
-        path = block_path(i)
-        print('reading block {}'.format(path))
+    for b in bins:
+        path = bin_path(b)
+        print('reading analysed binary {}'.format(path))
         with gzip.open(path, 'rb') as f:
-            results = results + pickle.load(f)
+            results.append(pickle.load(f))
     print('ran bap for {} binaries'.format(len(results)))
     return results
 
@@ -161,13 +158,7 @@ def main():
     results = block_process(bins, args)
     random.shuffle(results)
 
-    reg_x, reg_y, off_x, off_y = [], [], [], []
-
-    for res in results:
-        reg_x += res[0]
-        reg_y += res[1]
-        off_x += res[2]
-        off_y += res[3]
+    reg_x, reg_y, off_x, off_y = zip(*results)
 
     if not os.path.exists(args.out_model):
         os.makedirs(args.out_model)
