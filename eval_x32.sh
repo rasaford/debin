@@ -1,8 +1,8 @@
 #!/bin/bash
-workers=1
+workers=10
 port=$(shuf -i 2000-65000 -n 1)
-model_dir="/mnt/cache/models/x64_mid"
-dataset_dir="../dataset/elf/x64_mid/testing"
+model_dir="/mnt/cache/models/x32"
+dataset_dir="../dataset/elf/x32/testing"
 
 classifier="$model_dir/variable"
 crf_model_dir="$model_dir/crf/model"
