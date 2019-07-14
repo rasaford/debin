@@ -32,15 +32,10 @@ def get_args():
 
 
 def run_eval(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
-    try:
+    if not os.path.isfile(stat):
         evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model)
-        if os.path.isfile(stat):
-            return None
-    except Exception as e:
-        print('error in binary {}, {}'.format(binary, e))
-        return None
+        print('evaluated binary {}, loading results...'.format(binary))
 
-    print('evaluated binary {}, loading results...'.format(binary))
     with open(stat) as f:
         data = json.load(f)
     return data
