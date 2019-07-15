@@ -32,4 +32,5 @@ sleep 20 &&
         --classifier $classifier \
         --n2p_url $n2p_url \
         --log_dir $log_dir \
-	--workers $workers
+	--workers $workers &&
+        tar -czf $model_dir/eval_$(date +%Y-%m-%d_%H-%M-%S).tar.gz $log_dir

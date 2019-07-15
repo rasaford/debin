@@ -222,7 +222,7 @@ class Binary:
                     off_y.append(1)
                 else:
                     off_y.append(0)
-        return reg_x, bytes(reg_y), off_x, bytes(off_y)
+        return reg_x, bytearray(reg_y), off_x, bytearray(off_y)
 
     def get_debug_abbrev(self):
         bs = bytearray()
