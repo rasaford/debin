@@ -21,19 +21,19 @@ mkdir -p $out_model_var $out_model_crf $log_dir
 
 
 echo "STARTING VARIABLE TRAINING" &&
-	python3 py/train_variable.py \
-		--bin_list $bin_list \
-		--bin_dir $bin_dir \
-		--debug_dir $debug_dir \
-		--out_model $out_model_var \
-                --reg_num_p 800000 \
-                --reg_num_n 1000000 \
-                --reg_num_f 20000 \
-                --off_num_p 600000 \
-                --off_num_n 600000 \
-                --off_num_f 20000 \
-                --n_estimators 40 \
-		--workers $workers &&
+#	python3 py/train_variable.py \
+#		--bin_list $bin_list \
+#		--bin_dir $bin_dir \
+#		--debug_dir $debug_dir \
+#		--out_model $out_model_var \
+#                --reg_num_p 800000 \
+#                --reg_num_n 1000000 \
+#                --reg_num_f 20000 \
+#                --off_num_p 600000 \
+#                --off_num_n 600000 \
+#                --off_num_f 20000 \
+#                --n_estimators 40 \
+#		--workers $workers &&
 	echo "STARTING CRF TRAINING" &&
 	python3 py/train_crf.py \
 		--bin_list $bin_list \
