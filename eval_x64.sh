@@ -1,8 +1,8 @@
 #!/bin/bash
-workers=1
+workers=10
 port=$(shuf -i 2000-65000 -n 1)
-model_dir="/mnt/cache/models/x64_mid"
-dataset_dir="../dataset/elf/x64_mid/testing"
+model_dir="/mnt/cache/models/x64"
+dataset_dir="../dataset/elf/x64/testing"
 
 classifier="$model_dir/variable"
 crf_model_dir="$model_dir/crf/model"
@@ -32,4 +32,5 @@ sleep 20 &&
         --classifier $classifier \
         --n2p_url $n2p_url \
         --log_dir $log_dir \
-	--workers $workers
+	--workers $workers &&
+	tar -czf $model_dir/eval_$(date +%Y-%m-%d_%H-%M-%S).tar.gz $log_dir

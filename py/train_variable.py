@@ -161,7 +161,13 @@ def main():
     results = block_process(bins, args)
     random.shuffle(results)
 
+    flatten = lambda l: [item for sublist in l for item in sublist]
+
     reg_x, reg_y, off_x, off_y = zip(*results)
+    reg_x = flatten(reg_x)
+    reg_y = bytearray(flatten(reg_y))
+    off_x = flatten(off_x)
+    off_y = bytearray(flatten(off_y))
 
     if not os.path.exists(args.out_model):
         os.makedirs(args.out_model)

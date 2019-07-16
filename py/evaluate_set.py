@@ -33,6 +33,7 @@ def get_args():
 
 def run_eval(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
     if not os.path.isfile(stat):
+        print('not file ' + stat)
         evaluate_binary(binary, bap, debug_info, n2p_url,
                         stat, two_pass, fp_model)
         print('evaluated binary {}, loading results...'.format(binary))
