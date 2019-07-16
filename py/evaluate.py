@@ -38,6 +38,10 @@ def get_args():
 
 
 def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model, output='', elf_modify=''):
+    
+    if os.path.isfile(stat):
+        return
+
     config = Config()
 
     config.MODE = config.TRAIN
