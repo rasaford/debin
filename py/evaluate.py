@@ -29,12 +29,15 @@ def get_args():
                         help='URL of n2p server.')
     parser.add_argument('--stat', dest='stat', type=str, required=True,
                         help='Path of output statistics file.')
-
+    parser.add_argument('--output', dest='output', type=str, default='', required=False,
+                        help='path of output binary.')
+    parser.add_argument('--elf_modifier', dest='elf_modifier', type=str, default='', required=False,
+                        help='path of the library for modifying ELF binaries.')
     args = parser.parse_args()
     return args
 
 
-def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
+def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model, output='', elf_modify=''):
     config = Config()
 
     config.MODE = config.TRAIN
@@ -49,6 +52,11 @@ def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
 
     config.TWO_PASS = two_pass
     config.FP_MODEL_PATH = fp_model
+
+    if output and elf_modify:
+        config.OUTPUT_BINARY_PATH = output
+        config.MODIFY_ELF_LIB_PATH = elf_modify
+
     if config.TWO_PASS:
         reg_dict = open(os.path.join(config.FP_MODEL_PATH, 'reg.dict'), 'rb')
         reg_model = open(os.path.join(config.FP_MODEL_PATH, 'reg.model'), 'rb')
@@ -91,4 +99,4 @@ def evaluate_binary(binary, bap, debug_info, n2p_url, stat, two_pass, fp_model):
 if __name__ == '__main__':
     args = get_args()
     evaluate_binary(args.binary, args.bap, args.debug_info, args.n2p_url,
-                    args.stat, args.two_pass, args.fp_model)
+                    args.stat, args.two_pass, args.fp_model, args.output, args.elf_modifier)
