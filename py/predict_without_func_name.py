@@ -41,7 +41,7 @@ def get_args():
 
 def main():
     args = get_args()
-
+    if os.path.isfile(args.stat): return
     config = Config()
 
     config.MODE = config.TRAIN
